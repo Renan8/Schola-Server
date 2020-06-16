@@ -4,7 +4,8 @@
   "description": "API",
   "main": "index.js",
   "scripts": {
-    "server-dev": "ts-node src/server.ts"
+    "dev": "ts-node src/server.ts",
+    "knex:migrate": "knex migrate:latest --knexfile knexfile.ts"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,9 @@
   },
   "homepage": "https://github.com/Renan8/schola.server#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "knex": "^0.21.1",
+    "sqlite3": "^4.2.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.6",

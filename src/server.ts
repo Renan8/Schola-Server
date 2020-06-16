@@ -1,11 +1,8 @@
-import express from 'express';
+import App from './app';
+import StudentController from './modules/student/student.controller';
 
-const app = express();
+const app = new App([
+    new StudentController()
+], 5000);
 
-app.get('/', (request, response) => {
-    return response.status(200).json({
-        message: 'Sucesso'
-    });
-});
-
-app.listen(4040);
+app.listen();
