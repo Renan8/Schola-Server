@@ -2,7 +2,7 @@ import Knex from 'knex';
 
 export async function up(knex: Knex) {
     return knex.schema
-    .createTableIfNotExists('authentication', table => {
+    .createTableIfNotExists('user', table => {
         
         table.increments('id')
              .primary()
@@ -28,7 +28,7 @@ export async function up(knex: Knex) {
 
 export async function down(knex: Knex) {
     return knex.schema
-    .dropTableIfExists('events')
+    .dropTableIfExists('user')
     .catch(function(e) {
      console.log(e);
  });;
