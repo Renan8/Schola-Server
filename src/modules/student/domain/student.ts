@@ -1,5 +1,5 @@
 interface Student {
-    id: number;
+    id?: number;
     registration_number: string;
     name: string;
     cellphone?: string;

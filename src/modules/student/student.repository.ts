@@ -1,23 +1,37 @@
 import conn from '../../infra/connection';
 import './domain/student';
 
-class StudentRepository {
+export class StudentRepository {
 
-    async findAll() : Promise<Student[]> {
-        const students = await conn.select('*')
-                                   .from<Student>('student');
+    async findAll() : Promise<Student[] | undefined> {
+        const students = await conn.select('id', 
+                                           'registration_number',
+                                           'name', 
+                                           'cellphone', 
+                                           'photo', 
+                                           'birthday_date')
+                                   .from<Student>('student')
+                                   .catch(function(e) {
+                                       return undefined;
+                                   });
 
         return students;
     }
 
-    async find() {
+    async findOne(id: number) : Promise<Student | undefined> {
+        const student = await conn.select('id', 
+                                          'registration_number',
+                                          'name', 
+                                          'cellphone', 
+                                          'photo', 
+                                          'birthday_date')
+                                   .from<Student>('student')
+                                   .first()
+                                   .catch(function(e) {
+                                        return undefined;
+                                    });
 
-    }
-    
-    async create(student: Student) {
-
+        return student;
     }
 
 }
-
-export default StudentRepository;

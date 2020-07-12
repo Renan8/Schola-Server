@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
-import StudentRepository from './student.repository';
-import StudentMap from './mapper/student.map';
+import { StudentService } from './student.service';
 import { BaseController } from '../../core/base-controller';
 
 import '../student/dto/student.dto';
@@ -9,12 +8,12 @@ export default class StudentController extends BaseController {
 
     private path = '/students';
     private router = express();
-    private repository: StudentRepository;
+    private service: StudentService;
 
     constructor() {
         super();
         this.initializeRoutes();
-        this.repository = new StudentRepository;
+        this.service = new StudentService;
     }
     
     public initializeRoutes() {
@@ -22,10 +21,12 @@ export default class StudentController extends BaseController {
     }
 
     public index = async (request: Request, response: Response) => {
-        const result = await this.repository.findAll();
+        const result = await this.service.findAll();
+        
+        if (result.length == 0) {
+            return this.notFound(response);
+        }
 
-        const studentsDTO = result.map(student => StudentMap.toDTO(student));
-
-        return this.ok<StudentDTO[]>(response, studentsDTO);
+        return this.ok<StudentDTO[]>(response, result);
     }
 }

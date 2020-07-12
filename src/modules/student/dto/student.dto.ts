@@ -1,5 +1,6 @@
 interface StudentDTO {
-    registration_number: string
+    id?: number;
+    registration_number: string;
     name: string;
     cellphone?: string;
     photo?: string;

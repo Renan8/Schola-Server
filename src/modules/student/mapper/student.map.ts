@@ -4,6 +4,7 @@ class StudentMap {
 
     public static toDTO(domain: Student) : StudentDTO {
         return {
+            id: domain.id,
             registration_number: domain.registration_number,
             name: domain.name,
             cellphone: domain.cellphone,
