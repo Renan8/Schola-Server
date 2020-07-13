@@ -8,6 +8,9 @@ export async function up(knex: Knex) {
              .primary()
              .unsigned();
 
+        table.string('name')
+             .notNullable();
+
         table.string('email')
              .notNullable()
              .unique();
