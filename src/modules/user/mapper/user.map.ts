@@ -5,6 +5,7 @@ class UserMap {
     public static toDTO(domain: User) : UserDTO {
         return {
             id: domain.id,
+            name: domain.name,
             email: domain.email
         }
     }

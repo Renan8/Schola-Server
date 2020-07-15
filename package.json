@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/Renan8/schola.server#readme",
   "dependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "bcrypt": "^5.0.0",
     "express": "^4.17.1",
     "knex": "^0.21.1",
     "sqlite3": "^4.2.0"

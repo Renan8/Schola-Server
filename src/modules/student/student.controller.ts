@@ -21,12 +21,12 @@ export default class StudentController extends BaseController {
     }
 
     public index = async (request: Request, response: Response) => {
-        const result = await this.service.findAll();
+        const students = await this.service.findAll();
         
-        if (result.length == 0) {
+        if (students.isEmpty()) {
             return this.notFound(response);
         }
 
-        return this.ok<StudentDTO[]>(response, result);
+        return this.ok<StudentDTO[]>(response, students);
     }
-}
+} 

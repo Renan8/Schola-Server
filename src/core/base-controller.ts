@@ -1,4 +1,4 @@
-import express, { Express, Response } from 'express';
+import { Response } from 'express';
 
 export abstract class BaseController {
     
@@ -36,5 +36,9 @@ export abstract class BaseController {
         return response.status(500).json({
             message: error.toString()
         });
+    }
+
+    protected unauthorized(response: Response) {
+        return response.sendStatus(401);
     }
 }

@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { BaseController } from "../../core/base-controller";
 import { UserService } from './user.service';
+import obj from '../../extensions/object.extension';
+import '../../extensions/array.extension';
 
 export default class UserController extends BaseController {
 
@@ -15,26 +17,45 @@ export default class UserController extends BaseController {
     }
     
     public initializeRoutes() {
-        this.router.post('/authentication', this.auth);
+        this.router.post('/authenticate', this.auth);
+        this.router.get(this.path, this.index);
         this.router.post(this.path, this.create);
     }
 
     public auth = async (request: Request, response: Response) => {
         const { email, password } = request.body;
 
-        const result = await this.service.authenticate(email, password);
+        const user = await this.service.authenticate(email, password);
 
-        return this.ok<User>(response);
+        if (obj.notExists(user)) {
+            return this.unauthorized(response);
+        }
+
+        return this.ok(response);
+    }
+
+    public index = async (request: Request, response: Response) => {
+        const users = await this.service.findAll();
+
+        if (users.isEmpty()) {
+            return this.notFound(response);
+        }
+
+        return this.ok(response, users);
     }
 
     public create = async (request: Request, response: Response) => {
-        const { email, password } = request.body;
+        const { name, email, password } = request.body;
         
         const user = await this.service.create({
+            name,
             email,
-            password,
-            created_at: new Date()
-        });
+            password
+        } as User);
+
+        if (obj.notExists(user)) {
+           return this.fail(response, "Not Created");
+        }
 
         return this.created(response, user);
     }
