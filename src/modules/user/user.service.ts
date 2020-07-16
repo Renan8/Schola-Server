@@ -1,33 +1,38 @@
-import { UserRepository } from "./user.repository";
-import UserMap from "./mapper/user.map";
+import { UserRepository } from './user.repository';
+import UserMap from './mapper/user.map';
+import AuthenticateMap from './mapper/authenticate.map';
 import bcrypt from 'bcrypt';
-import "./domain/user";
+import jwt from 'jsonwebtoken';
+import config from '../../config/auth.json';
 
 export class UserService {
 
     private repository: UserRepository;
-    private readonly SALT_ROUNDS = 10
+    private readonly SALT_ROUNDS = 10;
+    private readonly TOKEN_EXPIRATION = "1 day";
 
     constructor() {
         this.repository = new UserRepository;
     }
 
-    public async authenticate(email: string, password: string) : Promise<UserDTO> {
+    public async authenticate(email: string, password: string) : Promise<AuthenticateDTO> {
         const result = await this.repository.findOneBy(email);
 
         if (result == undefined) {
-            return { } as UserDTO
+            return { } as AuthenticateDTO
         }
 
-        const match = await bcrypt.compare(password, result.password);
-
-        if (!match) {
-            return { } as UserDTO
+        if (!await bcrypt.compare(password, result.password)) {
+            return { } as AuthenticateDTO
         }
+
+        const token = jwt.sign({ id: result.id }, config.secret, {
+            expiresIn: this.TOKEN_EXPIRATION
+        });
         
-        const userDTO = UserMap.toDTO(result);
+        const authenticateDTO = AuthenticateMap.toDTO(result, token);
 
-        return userDTO;
+        return authenticateDTO;
     }
 
     public async findAll() : Promise<UserDTO[]> {       

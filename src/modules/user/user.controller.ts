@@ -3,6 +3,7 @@ import { BaseController } from "../../core/base-controller";
 import { UserService } from './user.service';
 import obj from '../../extensions/object.extension';
 import '../../extensions/array.extension';
+import './domain/user';
 
 export default class UserController extends BaseController {
 
@@ -25,21 +26,19 @@ export default class UserController extends BaseController {
     public auth = async (request: Request, response: Response) => {
         const { email, password } = request.body;
 
-        const user = await this.service.authenticate(email, password);
+        const authentication = await this.service.authenticate(email, password);
 
-        if (obj.notExists(user)) {
+        if (obj.notExists(authentication))
             return this.unauthorized(response);
-        }
 
-        return this.ok(response);
+        return this.ok(response, authentication);
     }
 
     public index = async (request: Request, response: Response) => {
         const users = await this.service.findAll();
 
-        if (users.isEmpty()) {
+        if (users.isEmpty())
             return this.notFound(response);
-        }
 
         return this.ok(response, users);
     }
@@ -53,9 +52,8 @@ export default class UserController extends BaseController {
             password
         } as User);
 
-        if (obj.notExists(user)) {
+        if (obj.notExists(user))
            return this.fail(response, "Not Created");
-        }
 
         return this.created(response, user);
     }

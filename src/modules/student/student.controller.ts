@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { StudentService } from './student.service';
 import { BaseController } from '../../core/base-controller';
-
-import '../student/dto/student.dto';
+import AuthMiddleware from '../../middlewares/auth.middleware';
+import './domain/student';
 
 export default class StudentController extends BaseController {
 
@@ -12,10 +12,15 @@ export default class StudentController extends BaseController {
 
     constructor() {
         super();
+        this.initializeMiddleware();
         this.initializeRoutes();
         this.service = new StudentService;
     }
-    
+
+    public initializeMiddleware() {
+        this.router.use(AuthMiddleware.verifyToken);
+    }
+
     public initializeRoutes() {
         this.router.get(this.path, this.index);
     }

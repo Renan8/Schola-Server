@@ -1,5 +1,4 @@
 import conn from '../../infra/db/connection';
-import './domain/user';
 
 export class UserRepository {
 

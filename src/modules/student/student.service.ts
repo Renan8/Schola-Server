@@ -1,6 +1,5 @@
-import { StudentRepository } from "./student.repository";
-import "./domain/student";
-import StudentMap from "./mapper/student.map";
+import { StudentRepository } from './student.repository';
+import StudentMap from './mapper/student.map';
 
 export class StudentService {
 
