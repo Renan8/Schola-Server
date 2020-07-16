@@ -1,5 +1,4 @@
 import express, { Application } from 'express';
-import { BaseController } from './core/base-controller';
 
 class App {
 
@@ -26,7 +25,7 @@ class App {
 
     public listen() {
         this.app.listen(this.port, () => {
-            console.log(`App listening on the port: ${this.port}`);
+            console.log(`Server started on port ${this.port}`);
         });
     }
 }

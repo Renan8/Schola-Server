@@ -1,7 +1,6 @@
-import conn from '../../infra/connection';
-import './domain/student';
+import conn from '../../infra/db/connection';
 
-export class StudentRepository {
+class StudentRepository {
 
     async findAll() : Promise<Student[] | undefined> {
         const students = await conn.select('id', 
@@ -35,3 +34,5 @@ export class StudentRepository {
     }
 
 }
+
+export default StudentRepository;

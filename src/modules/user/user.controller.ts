@@ -1,8 +1,12 @@
 import express, { Request, Response } from 'express';
-import { BaseController } from "../../core/base-controller";
-import { UserService } from './user.service';
+import BaseController from "../../core/base-controller";
+import UserService from './user.service';
+import AuthMiddleare from '../../middlewares/auth.middleware';
+import obj from '../../extensions/object.extension';
+import '../../extensions/array.extension';
+import './domain/user';
 
-export default class UserController extends BaseController {
+class UserController extends BaseController {
 
     private path = '/users';
     private router = express();
@@ -15,27 +19,48 @@ export default class UserController extends BaseController {
     }
     
     public initializeRoutes() {
-        this.router.post('/authentication', this.auth);
+        this.router.post('/authenticate', this.auth);
+        this.router.get(this.path, AuthMiddleare.verifyToken, this.index);
         this.router.post(this.path, this.create);
     }
 
     public auth = async (request: Request, response: Response) => {
-        const { email, password } = request.body;
+        const basicAuthorization = request.headers.authorization;
 
-        const result = await this.service.authenticate(email, password);
+        if (basicAuthorization == undefined)
+            return this.unauthorized(response);
 
-        return this.ok<User>(response);
+        const authentication = await this.service.authenticate(basicAuthorization);
+
+        if (obj.notExists(authentication))
+            return this.unauthorized(response);
+
+        return this.ok(response, authentication);
+    }
+
+    public index = async (request: Request, response: Response) => {
+        const users = await this.service.findAll();
+
+        if (users.isEmpty())
+            return this.notFound(response);
+
+        return this.ok(response, users);
     }
 
     public create = async (request: Request, response: Response) => {
-        const { email, password } = request.body;
+        const { name, email, password } = request.body;
         
         const user = await this.service.create({
+            name,
             email,
-            password,
-            created_at: new Date()
-        });
+            password
+        } as User);
+
+        if (obj.notExists(user))
+           return this.fail(response, "Not Created");
 
         return this.created(response, user);
     }
 }
+
+export default UserController;

@@ -1,6 +1,6 @@
-import express, { Express, Response } from 'express';
+import { Response } from 'express';
 
-export abstract class BaseController {
+abstract class BaseController {
     
     protected abstract initializeRoutes() : void;
 
@@ -37,4 +37,10 @@ export abstract class BaseController {
             message: error.toString()
         });
     }
+
+    protected unauthorized(response: Response) {
+        return response.sendStatus(401);
+    }
 }
+
+export default BaseController;

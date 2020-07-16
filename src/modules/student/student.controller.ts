@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
-import { StudentService } from './student.service';
-import { BaseController } from '../../core/base-controller';
+import StudentService from './student.service';
+import BaseController from '../../core/base-controller';
+import AuthMiddleware from '../../middlewares/auth.middleware';
+import './domain/student';
 
-import '../student/dto/student.dto';
-
-export default class StudentController extends BaseController {
+class StudentController extends BaseController {
 
     private path = '/students';
     private router = express();
@@ -12,21 +12,27 @@ export default class StudentController extends BaseController {
 
     constructor() {
         super();
+        this.initializeMiddleware();
         this.initializeRoutes();
         this.service = new StudentService;
     }
-    
+
+    public initializeMiddleware() {
+        this.router.use(AuthMiddleware.verifyToken);
+    }
+
     public initializeRoutes() {
         this.router.get(this.path, this.index);
     }
 
     public index = async (request: Request, response: Response) => {
-        const result = await this.service.findAll();
+        const students = await this.service.findAll();
         
-        if (result.length == 0) {
+        if (students.isEmpty())
             return this.notFound(response);
-        }
 
-        return this.ok<StudentDTO[]>(response, result);
+        return this.ok<StudentDTO[]>(response, students);
     }
-}
+} 
+
+export default StudentController;
