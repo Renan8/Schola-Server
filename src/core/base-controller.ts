@@ -38,6 +38,12 @@ abstract class BaseController {
         });
     }
 
+    protected badRequest(response: Response, error: Error | string) {
+        return response.status(400).json({
+            message: error.toString()
+        });
+    }
+
     protected unauthorized(response: Response) {
         return response.sendStatus(401);
     }

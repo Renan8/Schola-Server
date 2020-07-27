@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import { errors } from 'celebrate';
 
 class App {
 
@@ -11,8 +12,13 @@ class App {
 
         this.middlewares();
         this.initializationControllers(controllers);
+        this.errors();
     }
     
+    private errors() {
+        this.app.use(errors());
+    }
+
     private middlewares() {
         this.app.use(express.json());
     }

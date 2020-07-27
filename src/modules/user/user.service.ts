@@ -14,16 +14,16 @@ class UserService {
         this.repository = new UserRepository;
     }
 
+    // Bloqueio por tentativas
     public async authenticate(credentials: string) : Promise<AuthenticateDTO> {
-
         const [ basic, hash ] = credentials.split(' ');
 
         if (basic !== config.credentials_type)
             return { } as AuthenticateDTO;
 
         const [ email, password ] = hash.decodeBase64().split(':');
-
-        const result = await this.repository.findOneBy(email);
+        
+        const result = await this.repository.findOneBy({ email });
 
         if (result == undefined)
             return { } as AuthenticateDTO;
@@ -41,6 +41,22 @@ class UserService {
         return authenticateDTO;
     }
 
+    public async create(user: User) : Promise<UserDTO> {     
+        user.password = await bcrypt.hash(user.password, config.rounds);
+
+        const result = await this.repository.create(user);
+        
+        if (!result)
+            return {} as UserDTO;
+
+        const userDTO = UserMap.toDTO({
+            id: result,
+            ... user
+        } as User);
+
+        return userDTO;
+    }
+
     public async findAll() : Promise<UserDTO[]> {       
         const result = await this.repository.findAll();
 
@@ -50,22 +66,32 @@ class UserService {
         const userDTO = result?.map(user => UserMap.toDTO(user));
 
         return userDTO;
-    }
+    }   
 
-    public async create(user: User) : Promise<UserDTO> {       
-        user.password = await bcrypt.hash(user.password, config.rounds);
+    public async findOneBy(params: {}) : Promise<UserDTO> {       
+        const result = await this.repository.findOneBy(params);
 
-        const result = await this.repository.create(user);
-        
-        if (result == 0)
+        if (result == undefined)
             return {} as UserDTO;
 
-        const userDTO = UserMap.toDTO({
-            id: result,
-            ... user
-        } as User);
+        const userDTO = UserMap.toDTO(result);
 
         return userDTO;
+    }
+
+    public async update(filter: {}, user: User) : Promise<Boolean> {
+        if (user.password !== undefined)
+            user.password = await bcrypt.hash(user.password, config.rounds);
+
+        const result = await this.repository.update(filter, user);
+
+        return result;
+    }
+
+    public async delete(id: number) : Promise<Boolean> {
+        const result = await this.repository.delete(id);
+
+        return result;
     }
 }
 
