@@ -33,7 +33,7 @@ class UserSchema {
         });
     }
 
-    public verifyUpdateBody() : RequestHandler {
+    public verifyIdParamsAndUpdateBody() : RequestHandler {
         return celebrate({
             params: Joi.object().keys({
                 id: Joi.number().min(1)

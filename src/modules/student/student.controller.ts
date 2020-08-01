@@ -1,20 +1,21 @@
 import express, { Request, Response } from 'express';
-import StudentService from './student.service';
-import BaseController from '../../core/base-controller';
+import BaseController from '../../core/abstracts/base-controller';
 import AuthMiddleware from '../../middlewares/auth.middleware';
+import IStudentService from '../../core/interfaces/services/istudent.service';
 import './domain/student';
+
 
 class StudentController extends BaseController {
 
     private path = '/students';
     private router = express();
-    private service: StudentService;
+    private studentService: IStudentService;
 
-    constructor() {
+    constructor(studentService: IStudentService) {
         super();
+        this.studentService = studentService;
         this.initializeMiddleware();
         this.initializeRoutes();
-        this.service = new StudentService;
     }
 
     public initializeMiddleware() {
@@ -26,7 +27,7 @@ class StudentController extends BaseController {
     }
 
     public index = async (request: Request, response: Response) => {
-        const students = await this.service.findAll();
+        const students = await this.studentService.findAll();
         
         if (students.isEmpty())
             return this.notFound(response);

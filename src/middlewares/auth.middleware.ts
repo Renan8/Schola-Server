@@ -6,12 +6,12 @@ class AuthMiddleware {
 
     public static verifyToken(request: Request, response: Response, next: NextFunction) {
 
-        const authHeader = request.headers.authorization;
+        const authorizationHeader = request.headers.authorization;
     
-        if (!authHeader)
+        if (!authorizationHeader)
             return response.status(401).send({ message: "No token provided" });
     
-        const parts = authHeader.split(' ');
+        const parts = authorizationHeader.split(' ');
     
         if (parts.length !== 2)
             return response.status(401).send({ message: "Token error" });

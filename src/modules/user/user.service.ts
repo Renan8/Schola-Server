@@ -1,56 +1,30 @@
-import UserRepository from './user.repository';
+import IUserRepository from '../../core/interfaces/repositories/iuser.repository';
+import IUserService from '../../core/interfaces/services/iuser.service';
 import UserMap from './mapper/user.map';
-import AuthenticateMap from './mapper/authenticate.map';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import config from '../../config/auth.json';
+import CryptHelper from '../../helper/crypt.helper';
+import '../../helper/crypt.helper';
 import '../../extensions/string.extension';
+import '../../extensions/array.extension';
 
-class UserService {
 
-    private repository: UserRepository;
+class UserService implements IUserService {
 
-    constructor() {
-        this.repository = new UserRepository;
-    }
+    private userRepository: IUserRepository;
 
-    // Bloqueio por tentativas
-    public async authenticate(credentials: string) : Promise<AuthenticateDTO> {
-        const [ basic, hash ] = credentials.split(' ');
-
-        if (basic !== config.credentials_type)
-            return { } as AuthenticateDTO;
-
-        const [ email, password ] = hash.decodeBase64().split(':');
-        
-        const result = await this.repository.findOneBy({ email });
-
-        if (result == undefined)
-            return { } as AuthenticateDTO;
-
-        if (!await bcrypt.compare(password, result.password))
-            return { } as AuthenticateDTO
-
-        const token = jwt.sign({ userId: result.id }, config.token.key, 
-        {
-            expiresIn: config.token.expires_in
-        });
-        
-        const authenticateDTO = AuthenticateMap.toDTO(result, token);
-
-        return authenticateDTO;
+    constructor(userRepository: IUserRepository) {
+        this.userRepository = userRepository;
     }
 
     public async create(user: User) : Promise<UserDTO> {     
-        user.password = await bcrypt.hash(user.password, config.rounds);
+        user.password = await CryptHelper.hash(user.password);
 
-        const result = await this.repository.create(user);
-        
-        if (!result)
+        const userId = await this.userRepository.create(user);
+
+        if (!userId)
             return {} as UserDTO;
 
         const userDTO = UserMap.toDTO({
-            id: result,
+            id: userId,
             ... user
         } as User);
 
@@ -58,20 +32,20 @@ class UserService {
     }
 
     public async findAll() : Promise<UserDTO[]> {       
-        const result = await this.repository.findAll();
+        const users = await this.userRepository.findAll();
 
-        if (result == undefined)
+        if (users === undefined)
             return [] as UserDTO[];
 
-        const userDTO = result?.map(user => UserMap.toDTO(user));
+        const usersDTO = users?.map(user => UserMap.toDTO(user));
 
-        return userDTO;
+        return usersDTO;
     }   
 
     public async findOneBy(params: {}) : Promise<UserDTO> {       
-        const result = await this.repository.findOneBy(params);
+        const result = await this.userRepository.findOneBy(params);
 
-        if (result == undefined)
+        if (result === undefined)
             return {} as UserDTO;
 
         const userDTO = UserMap.toDTO(result);
@@ -81,17 +55,17 @@ class UserService {
 
     public async update(filter: {}, user: User) : Promise<Boolean> {
         if (user.password !== undefined)
-            user.password = await bcrypt.hash(user.password, config.rounds);
+            user.password = await CryptHelper.hash(user.password);
 
-        const result = await this.repository.update(filter, user);
+        const isUpdated = await this.userRepository.update(filter, user);
 
-        return result;
+        return isUpdated;
     }
 
     public async delete(id: number) : Promise<Boolean> {
-        const result = await this.repository.delete(id);
+        const isDeleted = await this.userRepository.delete(id);
 
-        return result;
+        return isDeleted;
     }
 }
 

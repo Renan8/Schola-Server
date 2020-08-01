@@ -1,9 +1,10 @@
 import conn from '../../infra/db/connection';
+import IUserRepository from '../../core/interfaces/repositories/iuser.repository';
 
-class UserRepository {
+class UserRepository implements IUserRepository {
 
     public async findOneBy(filter: {}) : Promise<User | undefined> {
-        const response = await conn.select('id',
+        const user = await conn.select('id',
                                            'name',
                                            'email', 
                                            'password', 
@@ -15,12 +16,12 @@ class UserRepository {
                                     .catch(function(error: Error) {
                                         return undefined;
                                     });
-
-        return response;
+                                    
+        return user;
     }
 
-    public async findAll() : Promise<User[] | undefined>{
-        const response = await conn.select('id',
+    public async findAll() : Promise<User[] | undefined> {
+        const users = await conn.select('id',
                                            'name',
                                            'email', 
                                            'password', 
@@ -31,38 +32,37 @@ class UserRepository {
                                         return undefined;
                                     });
 
-        return response;
+        return users;
     }
 
-    public async create(user: User) : Promise<Boolean> {
-        const response = await conn.insert<number>(user)
+    public async create(user: User) : Promise<number> {
+        const userId = await conn.insert<number>(user)
                                    .into('user')
                                    .catch(function(error: Error) {
                                         return 0;
                                    });
 
-        return response === 1;
+        return userId;
     }
 
     public async update(filter: {}, user: User) : Promise<Boolean> {
-        const response = await conn("user").update(user)
+        const zeroOrOne = await conn("user").update(user)
                                            .where(filter)
-                                           .catch(function(e) {
-                                                console.log(e);
+                                           .catch(function(error: Error) {
                                                 return false;
                                            });
                                    
-        return response === 1;
+        return zeroOrOne === 1;
     }
 
     public async delete(id: number) : Promise<Boolean> {
-        const response = await conn("user").where({ id })
+        const zeroOrOne = await conn("user").where({ id })
                                            .del()
-                                           .catch(function(e){
+                                           .catch(function(error: Error){
                                                 return false;
                                            });
-                                          
-        return response === 1;
+
+        return zeroOrOne === 1;
     }
 
 }

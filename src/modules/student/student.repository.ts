@@ -1,6 +1,7 @@
 import conn from '../../infra/db/connection';
+import IStudentRepository from '../../core/interfaces/repositories/istudent.repository';
 
-class StudentRepository {
+class StudentRepository implements IStudentRepository {
 
     async findAll() : Promise<Student[] | undefined> {
         const students = await conn.select('id', 

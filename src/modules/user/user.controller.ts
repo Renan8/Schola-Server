@@ -1,9 +1,9 @@
 import express, { Request, Response } from 'express';
-import BaseController from "../../core/base-controller";
-import UserService from './user.service';
+import BaseController from "../../core/abstracts/base-controller";
+import IUserService from '../../core/interfaces/services/iuser.service';
+import IUserSchema from '../../core/interfaces/schemas/iuser.schema';
 import AuthMiddleare from '../../middlewares/auth.middleware';
 import obj from '../../extensions/object.extension';
-import UserSchema from './user.schema';
 import '../../extensions/array.extension';
 import './domain/user';
 
@@ -11,72 +11,57 @@ class UserController extends BaseController {
 
     private path = '/users';
     private router = express();
-    private service: UserService;
-    private schema: UserSchema;
+    private userService: IUserService;
+    private userSchema: IUserSchema;
 
-    constructor() {
+    constructor(userSchema: IUserSchema, userService: IUserService) {
         super();
-        this.schema = new UserSchema();
-        this.service = new UserService();
+        this.userSchema = userSchema;
+        this.userService = userService;
         this.initializeRoutes();
     }
     
     public initializeRoutes() {
-        this.router.post('/authenticate', this.auth);
-        this.router.post(this.path, this.schema.verifyCreateBody(), this.create);
         this.router.get(this.path, AuthMiddleare.verifyToken, this.index);
-        this.router.get(`${this.path}/:id`, AuthMiddleare.verifyToken, this.schema.verifyParamsId(), this.show);
-        this.router.put(`${this.path}/:id`, AuthMiddleare.verifyToken, this.schema.verifyUpdateBody(), this.update);
-        this.router.delete(`${this.path}/:id`, AuthMiddleare.verifyToken, this.schema.verifyParamsId(), this.delete);
-    }
-
-    public auth = async (request: Request, response: Response) => {
-        const basicAuthorization = request.headers.authorization;
-        
-        if (basicAuthorization == undefined)
-            return this.unauthorized(response);
-
-        const authentication = await this.service.authenticate(basicAuthorization);
-
-        if (obj.notExists(authentication))
-            return this.unauthorized(response);
-
-        return this.ok(response, authentication);
+        this.router.get(`${this.path}/:id`, AuthMiddleare.verifyToken, this.userSchema.verifyParamsId(), this.show);
+        this.router.post(this.path, this.userSchema.verifyCreateBody(), this.create);
+        this.router.put(`${this.path}/:id`, AuthMiddleare.verifyToken, this.userSchema.verifyIdParamsAndUpdateBody(), this.update);
+        this.router.delete(`${this.path}/:id`, AuthMiddleare.verifyToken, this.userSchema.verifyParamsId(), this.delete);
     }
 
     public create = async (request: Request, response: Response) => {
         const { name, email, password } = request.body;
         
-        const user = await this.service.create({
+        const userDTO = await this.userService.create({
             name,
             email,
             password
         } as User);
 
-        if (obj.notExists(user))
+        if (obj.notExists(userDTO))
            return this.badRequest(response, "Not Created");
 
-        return this.created(response, user);
+        return this.created(response, userDTO);
     }
 
     public index = async (request: Request, response: Response) => {
-        const users = await this.service.findAll();
+        const usersDTO = await this.userService.findAll();
 
-        if (users.isEmpty())
+        if (usersDTO.isEmpty())
             return this.notFound(response);
 
-        return this.ok(response, users);
+        return this.ok(response, usersDTO);
     }
 
     public show = async (request: Request, response: Response) => {
         const id = request.params.id;
 
-        const user = await this.service.findOneBy({ id });
+        const userDTO = await this.userService.findOneBy({ id });
 
-        if (obj.notExists(user))
+        if (obj.notExists(userDTO))
             return this.notFound(response);
 
-        return this.ok(response, user);
+        return this.ok(response, userDTO);
     }
 
     public update = async (request: Request, response: Response) => {
@@ -87,9 +72,9 @@ class UserController extends BaseController {
 
         const { name, email, password } = request.body;
 
-        const isSuccess = this.service.update({ id }, { name, email, password } as User);
+        const isUpdated = this.userService.update({ id }, { name, email, password } as User);
 
-        if (!isSuccess)
+        if (!isUpdated)
             return this.badRequest(response, "Not Updated");
 
         return this.ok(response);
@@ -98,9 +83,9 @@ class UserController extends BaseController {
     public delete = async (request: Request, response: Response) => {
         const id = request.params.id;
 
-        const isSuccess = this.service.delete(Number(id));
+        const isDeleted = await this.userService.delete(Number(id));
 
-        if (!isSuccess)
+        if (!isDeleted)
             return this.badRequest(response, "Not deleted");
 
         return this.ok(response);

@@ -1,21 +1,22 @@
-import StudentRepository from './student.repository';
 import StudentMap from './mapper/student.map';
+import IStudentRepository from '../../core/interfaces/repositories/istudent.repository';
+import IStudentService from '../../core/interfaces/services/istudent.service';
 
-class StudentService {
+class StudentService implements IStudentService {
 
-    private repository: StudentRepository;
+    private studentRepository: IStudentRepository;
 
-    constructor() {
-        this.repository = new StudentRepository;
+    constructor(studentRepository: IStudentRepository) {
+        this.studentRepository = studentRepository;
     }
 
     public async findAll() : Promise<StudentDTO[]> {
-        const result = await this.repository.findAll();
+        const students = await this.studentRepository.findAll();
 
-        if(result == undefined)
+        if(students == undefined)
             return [] as StudentDTO[];
 
-        const studentsDTO = result?.map(student => StudentMap.toDTO(student));
+        const studentsDTO = students?.map(student => StudentMap.toDTO(student));
 
         return studentsDTO;
     }

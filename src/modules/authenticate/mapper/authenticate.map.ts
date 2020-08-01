@@ -1,4 +1,4 @@
-import '../dto/user.dto';
+import '../../user/dto/user.dto';
 import '../dto/authenticate.dto';
 
 class AuthenticateMap {

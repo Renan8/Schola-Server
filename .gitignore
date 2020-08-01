@@ -111,3 +111,4 @@ dist
 
 # Secret
 auth.json
+crypt.json
